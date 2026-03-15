@@ -10,6 +10,7 @@ export interface Candidate {
 export interface City {
   id: string
   name: string
+  totalSeats: number
   candidates: Candidate[]
 }
 

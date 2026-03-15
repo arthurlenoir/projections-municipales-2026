@@ -13,16 +13,16 @@ import type { Candidate, FirstRoundResults, MergeMap } from '../types'
 import { getQualifyingIds } from '../simulation'
 import { allocateSeats } from '../seatAllocation'
 
-const TOTAL_SEATS = 69
-
 interface Props {
   candidates: Candidate[]
   firstRound: FirstRoundResults
   projection: Record<string, number>
   merges: MergeMap
+  totalSeats: number
 }
 
-export function SeatsChart({ candidates, firstRound, projection, merges }: Props) {
+export function SeatsChart({ candidates, firstRound, projection, merges, totalSeats }: Props) {
+  const TOTAL_SEATS = totalSeats
   const qualifyingIds = getQualifyingIds(candidates, firstRound, merges)
 
   if (qualifyingIds.length === 0) {

@@ -19,6 +19,7 @@ const COLORS = [
 export const montpellierCity: City = {
   id: 'montpellier',
   name: 'Montpellier',
+  totalSeats: 69,
   candidates: [
     {
       id: 'montpellier-1',

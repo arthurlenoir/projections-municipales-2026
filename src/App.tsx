@@ -1,6 +1,6 @@
-import type { FirstRoundResults, MergeMap, TransferMatrix } from './types'
+import type { City, FirstRoundResults, MergeMap, TransferMatrix } from './types'
 import { useLocalStorage } from './hooks/useLocalStorage'
-import { montpellierCity } from './data/cities'
+import { cities } from './data/cities'
 import { simulate, getCandidateStatus } from './simulation'
 import { FirstRoundInput } from './components/FirstRoundInput'
 import { MergeEditor } from './components/MergeEditor'
@@ -9,17 +9,18 @@ import { ProjectionChart } from './components/ProjectionChart'
 import { SeatsChart } from './components/SeatsChart'
 import './index.css'
 
-const city = montpellierCity
+interface CityAppProps {
+  city: City
+}
 
-function App() {
-  const [firstRound, setFirstRound] = useLocalStorage<FirstRoundResults>('proj-firstRound', {})
-  const [transfers, setTransfers] = useLocalStorage<TransferMatrix>('proj-transfers', {})
-  const [merges, setMerges] = useLocalStorage<MergeMap>('proj-merges', {})
+function CityApp({ city }: CityAppProps) {
+  const [firstRound, setFirstRound] = useLocalStorage<FirstRoundResults>(`proj-${city.id}-firstRound`, {})
+  const [transfers, setTransfers] = useLocalStorage<TransferMatrix>(`proj-${city.id}-transfers`, {})
+  const [merges, setMerges] = useLocalStorage<MergeMap>(`proj-${city.id}-merges`, {})
 
   function handleFirstRoundChange(id: string, value: number) {
     setFirstRound(prev => {
       const next = { ...prev, [id]: value }
-      // Auto-clear invalid merges: source <5% or host <10% and not top-2 fallback
       setMerges(prevMerges => {
         const cleaned = { ...prevMerges }
         for (const [sourceId, entry] of Object.entries(prevMerges)) {
@@ -75,56 +76,77 @@ function App() {
   const projection = simulate(city.candidates, firstRound, transfers, merges)
 
   return (
+    <main className="app-main">
+      <div className="city-toolbar">
+        <span>1er tour : 15 mars · 2e tour : 22 mars</span>
+        <button className="btn-reset" onClick={handleReset}>Réinitialiser</button>
+      </div>
+
+      <FirstRoundInput
+        city={city}
+        firstRound={firstRound}
+        onChange={handleFirstRoundChange}
+      />
+
+      <MergeEditor
+        city={city}
+        firstRound={firstRound}
+        merges={merges}
+        onMerge={handleMerge}
+        onMergeRate={handleMergeRate}
+      />
+
+      <TransferMatrixEditor
+        city={city}
+        firstRound={firstRound}
+        transfers={transfers}
+        merges={merges}
+        onChange={handleTransferChange}
+        onRemove={handleTransferRemove}
+      />
+
+      <ProjectionChart
+        candidates={city.candidates}
+        firstRound={firstRound}
+        projection={projection}
+        merges={merges}
+      />
+
+      <SeatsChart
+        candidates={city.candidates}
+        firstRound={firstRound}
+        projection={projection}
+        merges={merges}
+        totalSeats={city.totalSeats}
+      />
+    </main>
+  )
+}
+
+function App() {
+  const [selectedCityId, setSelectedCityId] = useLocalStorage<string>('proj-city', 'montpellier')
+  const city = cities.find(c => c.id === selectedCityId) ?? cities[0]
+
+  return (
     <div className="app">
       <header className="app-header">
         <div className="app-header-inner">
           <h1>Projections municipales 2026</h1>
           <div className="app-subtitle">
-            <span className="city-badge">{city.name}</span>
-            <span>1er tour : 15 mars · 2e tour : 22 mars</span>
-            <button className="btn-reset" onClick={handleReset}>Réinitialiser</button>
+            <select
+              className="city-select"
+              value={city.id}
+              onChange={e => setSelectedCityId(e.target.value)}
+            >
+              {cities.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
           </div>
         </div>
       </header>
 
-      <main className="app-main">
-        <FirstRoundInput
-          city={city}
-          firstRound={firstRound}
-          onChange={handleFirstRoundChange}
-        />
-
-        <MergeEditor
-          city={city}
-          firstRound={firstRound}
-          merges={merges}
-          onMerge={handleMerge}
-          onMergeRate={handleMergeRate}
-        />
-
-        <TransferMatrixEditor
-          city={city}
-          firstRound={firstRound}
-          transfers={transfers}
-          merges={merges}
-          onChange={handleTransferChange}
-          onRemove={handleTransferRemove}
-        />
-
-        <ProjectionChart
-          candidates={city.candidates}
-          firstRound={firstRound}
-          projection={projection}
-          merges={merges}
-        />
-
-        <SeatsChart
-          candidates={city.candidates}
-          firstRound={firstRound}
-          projection={projection}
-          merges={merges}
-        />
-      </main>
+      <CityApp key={city.id} city={city} />
 
       <footer className="app-footer">
         Simulation indicative — résultats non officiels
