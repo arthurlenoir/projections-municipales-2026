@@ -135,28 +135,28 @@ function TransferRow({ sourceId, city, qualifyingIds, transfers, onChange, onRem
 export function TransferMatrixEditor({ city, firstRound, transfers, merges, onChange, onRemove }: Props) {
   const qualifyingIds = getQualifyingIds(city.candidates, firstRound, merges)
 
-  // Only show eliminated candidates that are not absorbed by a merge
-  const eliminatedAndNotMerged = city.candidates.filter(c => {
+  // Show eliminated candidates and eligible (5–10%) candidates not absorbed by a merge
+  const nonQualifiedAndNotMerged = city.candidates.filter(c => {
     const status = getCandidateStatus(c.id, city.candidates, firstRound)
     const isMerged = c.id in merges
-    return status === 'eliminated' && !isMerged
+    return (status === 'eliminated' || status === 'eligible') && !isMerged
   })
 
   return (
     <section className="section">
       <h2>3. Reports de voix</h2>
       <p className="section-desc">
-        Pour chaque liste éliminée, définissez vers qui vont ses électeurs au second tour.
+        Pour chaque liste éliminée ou non-fusionnée (entre 5% et 10%), définissez vers qui vont ses électeurs au second tour.
         Les votes non redistribués sont considérés comme perdus (abstention).
       </p>
 
-      {eliminatedAndNotMerged.length === 0 ? (
+      {nonQualifiedAndNotMerged.length === 0 ? (
         <p className="section-empty">
-          Toutes les listes qualifiées sont présentes au second tour — aucun report à définir.
+          Toutes les listes présentes au second tour — aucun report à définir.
         </p>
       ) : (
         <div className="transfer-list">
-          {eliminatedAndNotMerged.map(candidate => (
+          {nonQualifiedAndNotMerged.map(candidate => (
             <TransferRow
               key={candidate.id}
               sourceId={candidate.id}
