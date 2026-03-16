@@ -28,7 +28,7 @@ export function SeatsChart({ candidates, firstRound, projection, merges, totalSe
   if (qualifyingIds.length === 0) {
     return (
       <section className="section">
-        <h2>5. Répartition des sièges</h2>
+        <h2>6. Répartition des sièges</h2>
         <p className="section-desc muted">
           Saisissez les résultats du premier tour pour voir la répartition des sièges.
         </p>
@@ -69,7 +69,7 @@ export function SeatsChart({ candidates, firstRound, projection, merges, totalSe
 
   return (
     <section className="section">
-      <h2>5. Répartition des sièges</h2>
+      <h2>6. Répartition des sièges</h2>
       <p className="section-desc">
         Répartition des {TOTAL_SEATS} sièges : prime majoritaire (50 % arrondis au supérieur) + D'Hondt proportionnel.
       </p>

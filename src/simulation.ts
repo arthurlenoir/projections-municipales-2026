@@ -1,4 +1,4 @@
-import type { Candidate, CandidateStatus, FirstRoundResults, MergeMap, TransferMatrix } from './types'
+import type { Candidate, CandidateStatus, FirstRoundResults, MergeMap, MobilizationRates, TransferMatrix } from './types'
 
 export function getCandidateStatus(
   candidateId: string,
@@ -86,4 +86,16 @@ export function simulate(
   }
 
   return score
+}
+
+export function applyMobilization(
+  projection: Record<string, number>,
+  mobilization: MobilizationRates,
+  qualifyingIds: string[],
+): Record<string, number> {
+  const result = { ...projection }
+  for (const id of qualifyingIds) {
+    result[id] = (projection[id] ?? 0) * ((mobilization[id] ?? 100) / 100)
+  }
+  return result
 }

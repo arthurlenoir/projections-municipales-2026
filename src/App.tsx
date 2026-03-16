@@ -1,10 +1,11 @@
-import type { City, FirstRoundResults, MergeMap, TransferMatrix } from './types'
+import type { City, FirstRoundResults, MergeMap, MobilizationRates, TransferMatrix } from './types'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { cities } from './data/cities'
-import { simulate, getCandidateStatus } from './simulation'
+import { simulate, getCandidateStatus, getQualifyingIds, applyMobilization } from './simulation'
 import { FirstRoundInput } from './components/FirstRoundInput'
 import { MergeEditor } from './components/MergeEditor'
 import { TransferMatrixEditor } from './components/TransferMatrix'
+import { MobilizationEditor } from './components/MobilizationEditor'
 import { ProjectionChart } from './components/ProjectionChart'
 import { SeatsChart } from './components/SeatsChart'
 import './index.css'
@@ -14,9 +15,10 @@ interface CityAppProps {
 }
 
 function CityApp({ city }: CityAppProps) {
-  const [firstRound, setFirstRound] = useLocalStorage<FirstRoundResults>(`proj-${city.id}-firstRound`, {})
+  const [firstRound, setFirstRound] = useLocalStorage<FirstRoundResults>(`proj-${city.id}-firstRound`, city.defaultFirstRound ?? {})
   const [transfers, setTransfers] = useLocalStorage<TransferMatrix>(`proj-${city.id}-transfers`, {})
   const [merges, setMerges] = useLocalStorage<MergeMap>(`proj-${city.id}-merges`, {})
+  const [mobilization, setMobilization] = useLocalStorage<MobilizationRates>(`proj-${city.id}-mobilization`, {})
 
   function handleFirstRoundChange(id: string, value: number) {
     setFirstRound(prev => {
@@ -67,13 +69,20 @@ function CityApp({ city }: CityAppProps) {
     })
   }
 
-  function handleReset() {
-    setFirstRound({})
-    setTransfers({})
-    setMerges({})
+  function handleMobilizationChange(id: string, value: number) {
+    setMobilization(prev => ({ ...prev, [id]: value }))
   }
 
-  const projection = simulate(city.candidates, firstRound, transfers, merges)
+  function handleReset() {
+    setFirstRound(city.defaultFirstRound ?? {})
+    setTransfers({})
+    setMerges({})
+    setMobilization({})
+  }
+
+  const rawProjection = simulate(city.candidates, firstRound, transfers, merges)
+  const qualifyingIds = getQualifyingIds(city.candidates, firstRound, merges)
+  const projection = applyMobilization(rawProjection, mobilization, qualifyingIds)
 
   return (
     <main className="app-main">
@@ -103,6 +112,14 @@ function CityApp({ city }: CityAppProps) {
         merges={merges}
         onChange={handleTransferChange}
         onRemove={handleTransferRemove}
+      />
+
+      <MobilizationEditor
+        candidates={city.candidates}
+        firstRound={firstRound}
+        merges={merges}
+        mobilization={mobilization}
+        onChange={handleMobilizationChange}
       />
 
       <ProjectionChart

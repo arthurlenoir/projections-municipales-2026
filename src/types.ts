@@ -12,6 +12,7 @@ export interface City {
   name: string
   totalSeats: number
   candidates: Candidate[]
+  defaultFirstRound?: FirstRoundResults
 }
 
 // candidate id → vote percentage (0-100)
@@ -28,6 +29,8 @@ export interface MergeEntry {
   rate: number  // 0–100: % of source votes transferred to host (rest → abstention)
 }
 export type MergeMap = Record<string, MergeEntry>
+
+export type MobilizationRates = Record<string, number>
 
 // qualified: ≥10%, OR top-2 fallback (when fewer than 2 lists hit ≥10%)
 // eligible:  ≥5% and <10% (can merge into a qualified list, otherwise eliminated)

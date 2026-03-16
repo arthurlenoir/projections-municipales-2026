@@ -25,7 +25,7 @@ export function ProjectionChart({ candidates, firstRound, projection, merges }: 
   if (qualifyingIds.length === 0) {
     return (
       <section className="section">
-        <h2>4. Projection second tour</h2>
+        <h2>5. Projection second tour</h2>
         <p className="section-desc muted">
           Saisissez les résultats du premier tour pour voir la projection.
         </p>
@@ -61,7 +61,7 @@ export function ProjectionChart({ candidates, firstRound, projection, merges }: 
 
   return (
     <section className="section">
-      <h2>4. Projection second tour</h2>
+      <h2>5. Projection second tour</h2>
       <p className="section-desc">
         Scores projetés au second tour, après fusions et reports de voix.
       </p>
